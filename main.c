@@ -4,23 +4,30 @@
 #include <string.h>
 #include <locale.h>
 
+enum TransactionType {
+    EXPENSE = 1,
+    PROFIT = 2
+};
+
 struct Transaction {
     int id;
     char name[30];
     int amount;
+    enum TransactionType type;
     struct Transaction *next;
 };
 
 struct Transaction *head = NULL;
 struct Transaction *current = NULL;
 
-void insertTransaction(int id, char *name, int amount) {
+void insertTransaction(int id, char *name, int amount, enum TransactionType type) {
     struct Transaction *newTransaction = (struct Transaction *)malloc(sizeof(struct Transaction));
 
     // data insertion
     newTransaction->id = id;
     strcpy(newTransaction->name, name);
     newTransaction->amount = amount;
+    newTransaction->type = type;
     newTransaction->next = NULL;
 
     if (head == NULL) {
@@ -41,7 +48,8 @@ void displayTransactions() {
     }
 
     while (temp != NULL) {
-        printf("ID: %d, Nome: %s, Valor: %.2f\n", temp->id, temp->name, (double)temp->amount/100);
+        char *cor = (temp->type == EXPENSE) ? "\033[1;31m" : "\033[1;32m";
+        printf("ID: %d, Nome: %s, Valor: %s%.2f\033[0m\n", temp->id, temp->name, cor, (double)temp->amount/100);
         temp = temp->next;
     }
 }
@@ -60,9 +68,9 @@ struct Transaction *searchTransaction(int id) {
     return temp;
 }
 
-void updateTransaction(int id, char *name, int amount) {
+void updateTransaction(int id, char *name, int amount, enum TransactionType type) {
     struct Transaction *temp = searchTransaction(id);
-    
+
     if (temp == NULL) {
         printf("Transação não encontrada\n");
         return;
@@ -71,6 +79,7 @@ void updateTransaction(int id, char *name, int amount) {
     // data update
     strcpy(temp->name, name);
     temp->amount = amount;
+    temp->type = type;
     
     printf("Transação atualizada com sucesso\n");
 }
@@ -107,11 +116,35 @@ void pause() {
     getchar();
 }
 
+enum TransactionType translateToTransactionType() {
+    enum TransactionType type = 0;
+    int typeNumber = 0;
+
+    printf("Qual o tipo de transação a ser realizada?\n1- Despesa\n2- Ganho\n");
+    printf("Escolha uma opção: ");
+    scanf("%i", &typeNumber);
+    
+    // transaction type validation
+    if (typeNumber == EXPENSE) {
+        type = EXPENSE;
+    } else if (typeNumber == PROFIT) {
+        type = PROFIT;
+    } else {
+        printf("Tipo inválido! Usando DESPESA como padrão.\n");
+        type = EXPENSE;
+        pause();
+        __fpurge(stdin);
+    }
+
+    return type;
+}
+
 void main() {
     int resp = -1;
-    int id, amount;
-    double doubleAmount;
+    int id, amount = 0;
+    double doubleAmount = 0;
     char name[30];
+    enum TransactionType type = 0;
 
     // turns OS locale language
     setlocale(LC_ALL, "");
@@ -124,9 +157,11 @@ void main() {
         switch (resp) {
             case 1:
                 system("clear");
+                type = translateToTransactionType();
+                system("clear");
+                
                 printf("Insira uma descrição: ");
-                __fpurge(stdin);
-                getchar(); // prevents getting \n from buffer
+                __fpurge(stdin); // prevents getting \n from buffer
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
                 
@@ -141,7 +176,7 @@ void main() {
                     id = current->id+1;
                 }
 
-                insertTransaction(id, name, amount);
+                insertTransaction(id, name, amount, type);
                 break;
             case 2:
                 system("clear");
@@ -158,7 +193,9 @@ void main() {
                 // casting into int and turning it cents
                 amount = (int)(doubleAmount * 100);
 
-                updateTransaction(id, name, amount);
+                type = translateToTransactionType();
+
+                updateTransaction(id, name, amount, type);
                 break;
             case 3:
                 system("clear");
@@ -178,7 +215,8 @@ void main() {
                     break;
                 }
 
-                printf("ID: %i, Nome: %s, Valor: %.2f\n", search->id, search->name, (double)search->amount/100);
+                char *cor = (search->type == EXPENSE) ? "\033[1;31m" : "\033[1;32m";
+                printf("ID: %d, Nome: %s, Valor: %s%.2f\033[0m\n", search->id, search->name, cor, (double)search->amount/100);
                 pause();
                 break;
             case 5:
