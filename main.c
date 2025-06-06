@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdio_ext.h>
 #include <string.h>
 #include <locale.h>
 
@@ -124,6 +125,7 @@ void main() {
             case 1:
                 system("clear");
                 printf("Insira uma descrição: ");
+                __fpurge(stdin);
                 getchar(); // prevents getting \n from buffer
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
@@ -147,7 +149,7 @@ void main() {
                 scanf("%i", &id);
 
                 printf("Insira uma descrição: ");
-                getchar(); // prevents getting \n from buffer
+                __fpurge(stdin); // prevents getting \n from buffer
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
                 
