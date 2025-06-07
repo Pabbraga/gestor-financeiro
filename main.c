@@ -38,18 +38,25 @@ void insertTransaction(int id, char *name, int amount, enum TransactionType type
         current->next = newTransaction;
         current = newTransaction;
     }
+
+    printf("\nTransação inserida com sucesso\n");
+}
+
+void showTransaction(struct Transaction *transaction) {
+    char *color = (transaction->type == EXPENSE) ? "\033[1;31m" : "\033[1;32m";
+    char *transactionType = (transaction->type == EXPENSE) ? "Despesa" : "Ganho";
+    printf("ID: %d, Nome: %s, Valor: %s%.2f\033[0m, Tipo de transação: %s\n", transaction->id, transaction->name, color, (double)transaction->amount/100, transactionType);  
 }
 
 void displayTransactions() {
     struct Transaction *temp = head;
-    printf("\nResultado\n------------\n");
+
     if (temp == NULL) {
-        printf("Transações não encontradas");
+        printf("Transações não encontradas\n");
     }
 
     while (temp != NULL) {
-        char *cor = (temp->type == EXPENSE) ? "\033[1;31m" : "\033[1;32m";
-        printf("ID: %d, Nome: %s, Valor: %s%.2f\033[0m\n", temp->id, temp->name, cor, (double)temp->amount/100);
+        showTransaction(temp);
         temp = temp->next;
     }
 }
@@ -68,20 +75,18 @@ struct Transaction *searchTransaction(int id) {
     return temp;
 }
 
-void updateTransaction(int id, char *name, int amount, enum TransactionType type) {
-    struct Transaction *temp = searchTransaction(id);
-
-    if (temp == NULL) {
-        printf("Transação não encontrada\n");
+void updateTransaction(int id, char *name, int amount, enum TransactionType type, struct Transaction *transactionToUpdate) {
+    if (transactionToUpdate == NULL) {
+        printf("\nTransação não encontrada\n");
         return;
     }
     
     // data update
-    strcpy(temp->name, name);
-    temp->amount = amount;
-    temp->type = type;
+    strcpy(transactionToUpdate->name, name);
+    transactionToUpdate->amount = amount;
+    transactionToUpdate->type = type;
     
-    printf("Transação atualizada com sucesso\n");
+    printf("\nTransação atualizada com sucesso\n");
 }
 
 void removeTransaction(int id) {
@@ -95,7 +100,7 @@ void removeTransaction(int id) {
     }
 
     if (temp->id != id) {
-        printf("Transação não encontrada\n");
+        printf("\nTransação não encontrada\n");
         return;
     }
     
@@ -106,7 +111,7 @@ void removeTransaction(int id) {
     }
 
     free(temp);
-    printf("Transação removida com sucesso\n");
+    printf("\nTransação removida com sucesso\n");
 }
 
 void pause() {
@@ -130,10 +135,8 @@ enum TransactionType translateToTransactionType() {
     } else if (typeNumber == PROFIT) {
         type = PROFIT;
     } else {
-        printf("Tipo inválido! Usando DESPESA como padrão.\n");
+        printf("\nTipo inválido! Usando Despesa como padrão\n");
         type = EXPENSE;
-        pause();
-        __fpurge(stdin);
     }
 
     return type;
@@ -145,6 +148,7 @@ void main() {
     double doubleAmount = 0;
     char name[30];
     enum TransactionType type = 0;
+    struct Transaction *search = NULL;
 
     // turns OS locale language
     setlocale(LC_ALL, "");
@@ -158,13 +162,13 @@ void main() {
             case 1:
                 system("clear");
                 type = translateToTransactionType();
-                system("clear");
                 
-                printf("Insira uma descrição: ");
+                printf("Insira uma descrição (limite 30 caracteres): ");
                 __fpurge(stdin); // prevents getting \n from buffer
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
                 
+                __fpurge(stdin);
                 printf("Insira um valor: ");
                 scanf("%lf", &doubleAmount);
                 // casting into int and turning it cents
@@ -177,13 +181,18 @@ void main() {
                 }
 
                 insertTransaction(id, name, amount, type);
+                pause();
                 break;
             case 2:
                 system("clear");
                 printf("Insira o ID: ");
                 scanf("%i", &id);
 
-                printf("Insira uma descrição: ");
+                search = searchTransaction(id);
+                printf("\nResultado\n------------\n");
+                showTransaction(search);
+
+                printf("Insira uma descrição (limite 30 caracteres): ");
                 __fpurge(stdin); // prevents getting \n from buffer
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
@@ -195,32 +204,55 @@ void main() {
 
                 type = translateToTransactionType();
 
-                updateTransaction(id, name, amount, type);
+                updateTransaction(id, name, amount, type, search);
+                pause();
                 break;
             case 3:
+                char confirmation = '\0';
                 system("clear");
                 printf("Insira o ID: ");
                 scanf("%i", &id);
+                
+                search = searchTransaction(id);
+                printf("\nResultado\n------------\n");
+                showTransaction(search);
+                
+                __fpurge(stdin);
+                printf("Você tem certeza disso? (s/n) ");
+                scanf("%c", &confirmation);
 
-                removeTransaction(id);
+                if(confirmation == 's') {
+                    removeTransaction(id);
+                    pause();
+                    break;
+                } else if(confirmation == 'n') {
+                    printf("\nCancelando operação...");
+                    pause();
+                    break;
+                }
+
+                printf("\nEscolha inválida! Cancelando operação...");
+                pause();
                 break;
             case 4:
                 system("clear");
                 printf("Insira o ID: ");
                 scanf("%i", &id);
-                struct Transaction *search = searchTransaction(id);
+                search = searchTransaction(id);
                 
                 if (search == NULL) {
                     printf("Transação não encontrada\n");
+                    pause();
                     break;
                 }
 
-                char *cor = (search->type == EXPENSE) ? "\033[1;31m" : "\033[1;32m";
-                printf("ID: %d, Nome: %s, Valor: %s%.2f\033[0m\n", search->id, search->name, cor, (double)search->amount/100);
+                printf("\nResultado\n------------\n");
+                showTransaction(search);
                 pause();
                 break;
             case 5:
                 system("clear");
+                printf("\nResultado\n------------\n");
                 displayTransactions();
                 pause();
                 break;
