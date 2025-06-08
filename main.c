@@ -108,6 +108,9 @@ void removeTransaction(int id) {
         head = temp->next;
     } else {
         prev->next = temp->next;
+        if (temp->next == NULL) {
+            current = prev;
+        }
     }
 
     free(temp);
