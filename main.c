@@ -52,8 +52,8 @@ void insertTransaction(int id, char *name, int amount, enum TransactionType type
 
 void showTransaction(struct Transaction *transaction) {
     char *color = (transaction->type == EXPENSE) ? "\033[1;31m" : "\033[1;32m";
-    char *transactionType = (transaction->type == EXPENSE) ? "Despesa" : "Ganho";
-    printf("ID: %d, Nome: %s, Valor: %s%.2f\033[0m, Tipo de transação: %s\n", transaction->id, transaction->name, color, (double)transaction->amount/100, transactionType);  
+    char *transactionType = (transaction->type == EXPENSE) ? "-" : "";
+    printf("ID: %d, Nome: %s, Valor: %sR$ %s%.2f\033[0m\n", transaction->id, transaction->name, color, transactionType, (double)transaction->amount/100);  
 }
 
 void displayTransactions() {
@@ -67,6 +67,10 @@ void displayTransactions() {
         showTransaction(temp);
         temp = temp->next;
     }
+
+    char *color = (balance < 0) ? "\033[1;31m" : "\033[1;32m";
+
+    printf("\nBalanço atual: %sR$ %.2f\033[0m\n", color, (double)balance/100);
 }
 
 struct Transaction *searchTransaction(int id) {
@@ -156,7 +160,7 @@ enum TransactionType translateToTransactionType() {
     enum TransactionType type = 0;
     int typeNumber = 0;
 
-    printf("Qual o tipo de transação a ser realizada?\n1- Despesa\n2- Ganho\n");
+    printf("\nQual o tipo de transação a ser realizada?\n1- Despesa\n2- Ganho\n");
     printf("Escolha uma opção: ");
     scanf("%i", &typeNumber);
     
@@ -194,7 +198,7 @@ void main() {
                 system("clear");
                 type = translateToTransactionType();
                 
-                printf("Insira uma descrição (limite 30 caracteres): ");
+                printf("\nInsira uma descrição (limite 30 caracteres): ");
                 __fpurge(stdin); // prevents getting \n from buffer
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
@@ -223,7 +227,7 @@ void main() {
                 printf("\nResultado\n------------\n");
                 showTransaction(search);
 
-                printf("Insira uma descrição (limite 30 caracteres): ");
+                printf("\nInsira uma descrição (limite 30 caracteres): ");
                 __fpurge(stdin); // prevents getting \n from buffer
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
@@ -249,7 +253,7 @@ void main() {
                 showTransaction(search);
                 
                 __fpurge(stdin);
-                printf("Você tem certeza disso? (s/n) ");
+                printf("\nVocê tem certeza disso? (s/n) ");
                 scanf("%c", &confirmation);
 
                 if(confirmation == 's') {
@@ -272,7 +276,7 @@ void main() {
                 search = searchTransaction(id);
                 
                 if (search == NULL) {
-                    printf("Transação não encontrada\n");
+                    printf("\nTransação não encontrada\n");
                     pause();
                     break;
                 }
