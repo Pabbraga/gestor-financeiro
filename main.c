@@ -19,6 +19,7 @@ struct Transaction {
 
 struct Transaction *head = NULL;
 struct Transaction *current = NULL;
+int balance = 0;
 
 void insertTransaction(int id, char *name, int amount, enum TransactionType type) {
     struct Transaction *newTransaction = (struct Transaction *)malloc(sizeof(struct Transaction));
@@ -29,6 +30,13 @@ void insertTransaction(int id, char *name, int amount, enum TransactionType type
     newTransaction->amount = amount;
     newTransaction->type = type;
     newTransaction->next = NULL;
+
+    // balance update
+    if (type == PROFIT) {
+        balance += amount;
+    } else {
+        balance -= amount;
+    }
 
     if (head == NULL) {
         // first insertion
@@ -80,11 +88,24 @@ void updateTransaction(int id, char *name, int amount, enum TransactionType type
         printf("\nTransação não encontrada\n");
         return;
     }
+
+    // previous value remove
+    if (transactionToUpdate->type == PROFIT) {
+        balance -= transactionToUpdate->amount;
+    } else {
+        balance += transactionToUpdate->amount;
+    }
     
     // data update
     strcpy(transactionToUpdate->name, name);
     transactionToUpdate->amount = amount;
     transactionToUpdate->type = type;
+
+    // balance update
+    if (type == PROFIT)
+        balance += amount;
+    else
+        balance -= amount;
     
     printf("\nTransação atualizada com sucesso\n");
 }
@@ -102,6 +123,13 @@ void removeTransaction(int id) {
     if (temp->id != id) {
         printf("\nTransação não encontrada\n");
         return;
+    }
+
+    // balance update
+    if (temp->type == PROFIT) {
+        balance -= temp->amount;
+    } else {
+        balance += temp->amount;
     }
     
     if (temp == head) {
