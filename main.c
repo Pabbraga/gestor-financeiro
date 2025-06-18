@@ -1,16 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdio_ext.h>
 #include <string.h>
 #include <locale.h>
 #include "transaction/transaction.c"
-
-void pause() {
-    printf("\nPressione [Enter] para continuar...\n");
-    
-    while(getchar()!='\n'); // waits enter key
-    getchar();
-}
+#include "display/cli.c"
 
 void main() {
     int resp = -1;
@@ -34,11 +27,10 @@ void main() {
                 type = translateToTransactionType();
                 
                 printf("\nInsira uma descrição (limite 30 caracteres): ");
-                __fpurge(stdin); // prevents getting \n from buffer
+                clear_buffer();
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
                 
-                __fpurge(stdin);
                 printf("Insira um valor: ");
                 scanf("%lf", &doubleAmount);
                 // casting into int and turning it cents
@@ -57,7 +49,7 @@ void main() {
                 showTransaction(search);
 
                 printf("\nInsira uma descrição (limite 30 caracteres): ");
-                __fpurge(stdin); // prevents getting \n from buffer
+                clear_buffer();
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = 0; // prevents \n after string
                 
@@ -81,7 +73,7 @@ void main() {
                 printf("\nResultado\n------------\n");
                 showTransaction(search);
                 
-                __fpurge(stdin);
+                clear_buffer();
                 printf("\nVocê tem certeza disso? (s/n) ");
                 scanf("%c", &confirmation);
 
@@ -93,10 +85,11 @@ void main() {
                     printf("\nCancelando operação...");
                     pause();
                     break;
+                } else {
+                    printf("\nEscolha inválida! Cancelando operação...");
+                    pause();
                 }
-
-                printf("\nEscolha inválida! Cancelando operação...");
-                pause();
+                
                 break;
             case 4:
                 system("clear");
