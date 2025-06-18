@@ -113,7 +113,12 @@ void main() {
                 displayTransactions();
                 pause();
                 break;
+            case 0:
+                printf("[Fim da execução]");
+                break;
             default:
+                printf("\nOpção inválida!\n");
+                pause();
                 break;
         }
     }
