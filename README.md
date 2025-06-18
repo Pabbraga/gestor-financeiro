@@ -1,10 +1,6 @@
 # Gestor Financeiro
 Gerenciador simples de transferências financeiras feito em C, operado via terminal. Desenvolvido para praticar conceitos de listas encadeadas na disciplina de Estruturas de Dados.
 
-## Objetivo
-- Praticar manipulação de listas encadeadas em C.
-- Exercitar modularização e boas práticas.
-
 ## Funcionalidades
 - **Inserir transação:** Cadastra uma nova transferência (descrição, valor e tipo).
 - **Atualizar transação:** Altera dados de uma transferência existente pelo ID.
