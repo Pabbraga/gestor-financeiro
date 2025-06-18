@@ -115,11 +115,13 @@ void main() {
                 break;
             case 0:
                 printf("[Fim da execução]");
+                exit(EXIT_SUCCESS);
                 break;
             default:
                 printf("\nOpção inválida!\n");
                 pause();
                 break;
         }
+        resp = -1;
     }
 }
